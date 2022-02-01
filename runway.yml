@@ -1,0 +1,36 @@
+---
+# See full syntax at https://docs.onica.com/projects/runway
+deployments:
+  - modules:
+      - path: core.tfstate
+        parameters:
+          cfngin_bucket_name: cfngin-training-${env USER}
+          namespace: ${var namespace}
+        tags:
+          - base
+      - path: vpc.tf
+        tags:
+          - vpc
+          - base
+        options:
+          terraform_backend_config:
+            bucket: ${cfn ${var namespace}-tf-state.TerraformStateBucketName}
+            dynamodb_table: ${cfn ${var namespace}-tf-state.TerraformStateTableName}
+      - path: bastion-host.tf
+        parameters:
+          cfngin_bucket_name: cfngin-training-${env USER}
+          namespace: ${var namespace}
+        options:
+          terraform_backend_config:
+            bucket: ${cfn ${var namespace}-tf-state.TerraformStateBucketName}
+            dynamodb_table: ${cfn ${var namespace}-tf-state.TerraformStateTableName}
+        tags:
+          - bastion
+      # - etc...
+    regions:
+      - us-east-1
+
+variables:
+  namespace: albe-customer-bastion
+  customer: albe-customer
+  region: us-east-1
